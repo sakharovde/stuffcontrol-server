@@ -11,6 +11,7 @@ import {
   Base64URLString,
   CredentialDeviceType,
   PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
 } from '@simplewebauthn/types';
 
 const server = fastify();
@@ -22,7 +23,7 @@ server.get('/ping', async (request, reply) => {
 type Passkey = {
   id: Base64URLString;
   publicKey: Uint8Array;
-  user: { email: string };
+  user: { username: string };
   webAuthnUserID: Base64URLString;
   counter: number;
   deviceType: CredentialDeviceType;
@@ -31,18 +32,18 @@ type Passkey = {
 };
 
 type UserModel = {
-  email: string;
+  username: string;
 };
 
 // users
-const getUserFromDB = (email: UserModel['email']): UserModel => {
-  return { email };
+const getUserFromDB = (username: UserModel['username']): UserModel => {
+  return { username };
 };
 
-const userPasskeysStorage: Record<UserModel['email'], Passkey[]> = {};
+const userPasskeysStorage: Record<UserModel['username'], Passkey[]> = {};
 
 const getUserPasskeys = (user: UserModel): Passkey[] => {
-  return userPasskeysStorage[user.email] || [];
+  return userPasskeysStorage[user.username] || [];
 };
 
 const getUserPasskey = (user: UserModel, passkeyID: Passkey['id']): Passkey => {
@@ -55,31 +56,47 @@ const getUserPasskey = (user: UserModel, passkeyID: Passkey['id']): Passkey => {
 };
 
 const saveNewPasskeyInDB = (user: UserModel, passkey: Passkey) => {
-  userPasskeysStorage[user.email] = [...(userPasskeysStorage[user.email] || []), passkey];
+  userPasskeysStorage[user.username] = [
+    ...(userPasskeysStorage[user.username] || []),
+    passkey,
+  ];
 };
 
-const currentUserRegistrationOptionsStorage: Record<UserModel['email'], PublicKeyCredentialCreationOptionsJSON> = {};
+const currentUserRegistrationOptionsStorage: Record<
+  UserModel['username'],
+  PublicKeyCredentialCreationOptionsJSON
+> = {};
 
-const setCurrentRegistrationOptions = (user: UserModel, options: PublicKeyCredentialCreationOptionsJSON) => {
-  currentUserRegistrationOptionsStorage[user.email] = options;
+const setCurrentRegistrationOptions = (
+  user: UserModel,
+  options: PublicKeyCredentialCreationOptionsJSON
+) => {
+  currentUserRegistrationOptionsStorage[user.username] = options;
 };
-const getCurrentRegistrationOptions = (user: UserModel): PublicKeyCredentialCreationOptionsJSON => {
-  if (!currentUserRegistrationOptionsStorage[user.email]) {
+const getCurrentRegistrationOptions = (
+  user: UserModel
+): PublicKeyCredentialCreationOptionsJSON => {
+  if (!currentUserRegistrationOptionsStorage[user.username]) {
     throw new Error('No registration options found for user');
   }
 
-  return currentUserRegistrationOptionsStorage[user.email];
+  return currentUserRegistrationOptionsStorage[user.username];
 };
 
-const saveRegistrationCredentials = (user: UserModel, verifiedRegistrationResponse: VerifiedRegistrationResponse) => {
-  const currentOptions: PublicKeyCredentialCreationOptionsJSON = getCurrentRegistrationOptions(user);
+const saveRegistrationCredentials = (
+  user: UserModel,
+  verifiedRegistrationResponse: VerifiedRegistrationResponse
+) => {
+  const currentOptions: PublicKeyCredentialCreationOptionsJSON =
+    getCurrentRegistrationOptions(user);
   const { registrationInfo } = verifiedRegistrationResponse;
 
   if (!registrationInfo) {
     throw new Error('No registration info found');
   }
 
-  const { credential, credentialDeviceType, credentialBackedUp } = registrationInfo;
+  const { credential, credentialDeviceType, credentialBackedUp } =
+    registrationInfo;
   const newPasskey: Passkey = {
     // `user` here is from Step 2
     user,
@@ -102,18 +119,26 @@ const saveRegistrationCredentials = (user: UserModel, verifiedRegistrationRespon
   saveNewPasskeyInDB(user, newPasskey);
 };
 
-const currentUserAuthenticationOptionsStorage: Record<UserModel['email'], PublicKeyCredentialRequestOptionsJSON> = {};
+const currentUserAuthenticationOptionsStorage: Record<
+  UserModel['username'],
+  PublicKeyCredentialRequestOptionsJSON
+> = {};
 
-const setCurrentAuthenticationOptions = (user: UserModel, options: PublicKeyCredentialRequestOptionsJSON) => {
-  currentUserAuthenticationOptionsStorage[user.email] = options;
+const setCurrentAuthenticationOptions = (
+  user: UserModel,
+  options: PublicKeyCredentialRequestOptionsJSON
+) => {
+  currentUserAuthenticationOptionsStorage[user.username] = options;
 };
 
-const getCurrentAuthenticationOptions = (user: UserModel): PublicKeyCredentialRequestOptionsJSON => {
-  if (!currentUserAuthenticationOptionsStorage[user.email]) {
+const getCurrentAuthenticationOptions = (
+  user: UserModel
+): PublicKeyCredentialRequestOptionsJSON => {
+  if (!currentUserAuthenticationOptionsStorage[user.username]) {
     throw new Error('No authentication options found for user');
   }
 
-  return currentUserAuthenticationOptionsStorage[user.email];
+  return currentUserAuthenticationOptionsStorage[user.username];
 };
 
 const passkeyCounterStorage: Record<Passkey['id'], number> = {};
@@ -128,27 +153,28 @@ const rpID = 'localhost';
 const origin = `http://${rpID}:5173`;
 
 server.post('/register', async (req, reply) => {
-  const { email } = req.body;
-  if (!email) return reply.status(400).send({ error: 'Email is required' });
+  const { username } = req.body;
+  if (!username) return reply.status(400).send({ error: 'Email is required' });
 
-  const user: UserModel = getUserFromDB(email);
+  const user: UserModel = getUserFromDB(username);
   const userPasskeys: Passkey[] = getUserPasskeys(user);
 
-  const options: PublicKeyCredentialCreationOptionsJSON = await generateRegistrationOptions({
-    rpName,
-    rpID,
-    userName: email,
-    attestationType: 'none',
-    excludeCredentials: userPasskeys.map((passkey) => ({
-      id: passkey.id,
-      transports: passkey.transports,
-    })),
-    authenticatorSelection: {
-      residentKey: 'preferred',
-      userVerification: 'preferred',
-      authenticatorAttachment: 'platform',
-    },
-  });
+  const options: PublicKeyCredentialCreationOptionsJSON =
+    await generateRegistrationOptions({
+      rpName,
+      rpID,
+      userName: username,
+      attestationType: 'none',
+      excludeCredentials: userPasskeys.map((passkey) => ({
+        id: passkey.id,
+        transports: passkey.transports,
+      })),
+      authenticatorSelection: {
+        residentKey: 'preferred',
+        userVerification: 'preferred',
+        authenticatorAttachment: 'platform',
+      },
+    });
 
   setCurrentRegistrationOptions(user, options);
 
@@ -156,11 +182,12 @@ server.post('/register', async (req, reply) => {
 });
 
 server.post('/register/verify', async (req, reply) => {
-  const { email, credential } = req.body;
-  const user: UserModel = getUserFromDB(email);
+  const { username, credential } = req.body;
+  const user: UserModel = getUserFromDB(username);
   if (!user) return reply.status(404).send({ error: 'User not found' });
 
-  const currentOptions: PublicKeyCredentialCreationOptionsJSON = getCurrentRegistrationOptions(user);
+  const currentOptions: PublicKeyCredentialCreationOptionsJSON =
+    getCurrentRegistrationOptions(user);
 
   const verification = await verifyRegistrationResponse({
     response: credential,
@@ -169,7 +196,8 @@ server.post('/register/verify', async (req, reply) => {
     expectedRPID: rpID,
   });
 
-  if (!verification.verified) return reply.status(400).send({ error: 'Verification failed' });
+  if (!verification.verified)
+    return reply.status(400).send({ error: 'Verification failed' });
 
   saveRegistrationCredentials(user, verification);
   reply.send({ verified: true });
@@ -177,18 +205,19 @@ server.post('/register/verify', async (req, reply) => {
 
 // authentication
 server.post('/authenticate', async (req, reply) => {
-  const { email } = req.body;
-  const user: UserModel = getUserFromDB(email);
+  const { username } = req.body;
+  const user: UserModel = getUserFromDB(username);
   if (!user) return reply.status(404).send({ error: 'User not found' });
   const userPasskeys: Passkey[] = getUserPasskeys(user);
 
-  const options: PublicKeyCredentialRequestOptionsJSON = await generateAuthenticationOptions({
-    rpID,
-    allowCredentials: userPasskeys.map((passkey) => ({
-      id: passkey.id,
-      type: passkey.transports,
-    })),
-  });
+  const options: PublicKeyCredentialRequestOptionsJSON =
+    await generateAuthenticationOptions({
+      rpID,
+      allowCredentials: userPasskeys.map((passkey) => ({
+        id: passkey.id,
+        type: passkey.transports,
+      })),
+    });
 
   setCurrentAuthenticationOptions(user, options);
 
@@ -196,11 +225,12 @@ server.post('/authenticate', async (req, reply) => {
 });
 
 server.post('/authenticate/verify', async (req, reply) => {
-  const { email, credential } = req.body;
-  const user: UserModel = getUserFromDB(email);
+  const { username, credential } = req.body;
+  const user: UserModel = getUserFromDB(username);
   if (!user) return reply.status(404).send({ error: 'User not found' });
 
-  const currentOptions: PublicKeyCredentialRequestOptionsJSON = getCurrentAuthenticationOptions(user);
+  const currentOptions: PublicKeyCredentialRequestOptionsJSON =
+    getCurrentAuthenticationOptions(user);
   const passkey: Passkey = getUserPasskey(user, credential.id);
 
   const verification = await verifyAuthenticationResponse({
@@ -216,7 +246,8 @@ server.post('/authenticate/verify', async (req, reply) => {
     },
   });
 
-  if (!verification.verified) return reply.status(400).send({ error: 'Verification failed' });
+  if (!verification.verified)
+    return reply.status(400).send({ error: 'Verification failed' });
 
   const { authenticationInfo } = verification;
   const { newCounter } = authenticationInfo;
