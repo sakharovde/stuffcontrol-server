@@ -7,11 +7,13 @@ import {
   verifyRegistrationResponse,
 } from '@simplewebauthn/server';
 import {
+  AuthenticationResponseJSON,
   AuthenticatorTransportFuture,
   Base64URLString,
   CredentialDeviceType,
   PublicKeyCredentialCreationOptionsJSON,
   PublicKeyCredentialRequestOptionsJSON,
+  RegistrationResponseJSON,
 } from '@simplewebauthn/types';
 
 const server = fastify();
@@ -152,7 +154,10 @@ const rpName = 'Stuff Control';
 const rpID = 'localhost';
 const origin = `http://${rpID}:5173`;
 
-server.post('/register', async (req, reply) => {
+server.post<{
+  Body: { username: string };
+  Reply: PublicKeyCredentialCreationOptionsJSON | { error: string };
+}>('/register', async (req, reply) => {
   const { username } = req.body;
   if (!username) return reply.status(400).send({ error: 'Email is required' });
 
@@ -181,7 +186,13 @@ server.post('/register', async (req, reply) => {
   reply.send(options);
 });
 
-server.post('/register/verify', async (req, reply) => {
+server.post<{
+  Body: {
+    username: string;
+    credential: RegistrationResponseJSON;
+  };
+  Reply: { verified: boolean } | { error: string };
+}>('/register/verify', async (req, reply) => {
   const { username, credential } = req.body;
   const user: UserModel = getUserFromDB(username);
   if (!user) return reply.status(404).send({ error: 'User not found' });
@@ -204,7 +215,10 @@ server.post('/register/verify', async (req, reply) => {
 });
 
 // authentication
-server.post('/authenticate', async (req, reply) => {
+server.post<{
+  Body: { username: string };
+  Reply: PublicKeyCredentialRequestOptionsJSON | { error: string };
+}>('/authenticate', async (req, reply) => {
   const { username } = req.body;
   const user: UserModel = getUserFromDB(username);
   if (!user) return reply.status(404).send({ error: 'User not found' });
@@ -224,7 +238,10 @@ server.post('/authenticate', async (req, reply) => {
   reply.send(options);
 });
 
-server.post('/authenticate/verify', async (req, reply) => {
+server.post<{
+  Body: { username: string; credential: AuthenticationResponseJSON };
+  Reply: { verified: boolean } | { error: string };
+}>('/authenticate/verify', async (req, reply) => {
   const { username, credential } = req.body;
   const user: UserModel = getUserFromDB(username);
   if (!user) return reply.status(404).send({ error: 'User not found' });
