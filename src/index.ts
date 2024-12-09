@@ -157,7 +157,7 @@ const origin = `http://${rpID}:5173`;
 server.post<{
   Body: { username: string };
   Reply: PublicKeyCredentialCreationOptionsJSON | { error: string };
-}>('/register', async (req, reply) => {
+}>('/api/register', async (req, reply) => {
   const { username } = req.body;
   if (!username) return reply.status(400).send({ error: 'Email is required' });
 
@@ -192,7 +192,7 @@ server.post<{
     credential: RegistrationResponseJSON;
   };
   Reply: { verified: boolean } | { error: string };
-}>('/register/verify', async (req, reply) => {
+}>('/api/register/verify', async (req, reply) => {
   const { username, credential } = req.body;
   const user: UserModel = getUserFromDB(username);
   if (!user) return reply.status(404).send({ error: 'User not found' });
@@ -218,7 +218,7 @@ server.post<{
 server.post<{
   Body: { username: string };
   Reply: PublicKeyCredentialRequestOptionsJSON | { error: string };
-}>('/authenticate', async (req, reply) => {
+}>('/api/authenticate', async (req, reply) => {
   const { username } = req.body;
   const user: UserModel = getUserFromDB(username);
   if (!user) return reply.status(404).send({ error: 'User not found' });
@@ -241,7 +241,7 @@ server.post<{
 server.post<{
   Body: { username: string; credential: AuthenticationResponseJSON };
   Reply: { verified: boolean } | { error: string };
-}>('/authenticate/verify', async (req, reply) => {
+}>('/api/authenticate/verify', async (req, reply) => {
   const { username, credential } = req.body;
   const user: UserModel = getUserFromDB(username);
   if (!user) return reply.status(404).send({ error: 'User not found' });
