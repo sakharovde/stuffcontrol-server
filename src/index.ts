@@ -16,7 +16,9 @@ import {
   RegistrationResponseJSON,
 } from '@simplewebauthn/types';
 
-const server = fastify();
+const server = fastify({
+  logger: true,
+});
 
 server.get('/ping', async (request, reply) => {
   return 'pong\n';
@@ -274,7 +276,10 @@ server.post<{
   reply.send({ verified: true });
 });
 
-server.listen({ port: 8080 }, (err, address) => {
+const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+const host = 'RENDER' in process.env ? `0.0.0.0` : `localhost`;
+
+server.listen({ host: host, port: port }, (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);
