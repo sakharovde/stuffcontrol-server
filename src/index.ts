@@ -170,7 +170,7 @@ server.post<{
   const options: PublicKeyCredentialCreationOptionsJSON =
     await generateRegistrationOptions({
       rpName,
-      rpID: req.host,
+      rpID: String(process.env.CLIENT_HOST),
       userName: username,
       attestationType: 'none',
       excludeCredentials: userPasskeys.map((passkey) => ({
@@ -207,7 +207,7 @@ server.post<{
     response: credential,
     expectedChallenge: currentOptions.challenge,
     expectedOrigin: String(req.headers.origin),
-    expectedRPID: req.host,
+    expectedRPID: String(process.env.CLIENT_HOST),
   });
 
   if (!verification.verified)
@@ -229,7 +229,7 @@ server.post<{
 
   const options: PublicKeyCredentialRequestOptionsJSON =
     await generateAuthenticationOptions({
-      rpID: req.host,
+      rpID: String(process.env.CLIENT_HOST),
       allowCredentials: userPasskeys.map((passkey) => ({
         id: passkey.id,
         type: passkey.transports,
@@ -257,7 +257,7 @@ server.post<{
     response: credential,
     expectedChallenge: currentOptions.challenge,
     expectedOrigin: origin,
-    expectedRPID: req.host,
+    expectedRPID: String(process.env.CLIENT_HOST),
     credential: {
       id: passkey.id,
       publicKey: passkey.publicKey,
