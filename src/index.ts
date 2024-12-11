@@ -256,7 +256,7 @@ server.post<{
   const verification = await verifyAuthenticationResponse({
     response: credential,
     expectedChallenge: currentOptions.challenge,
-    expectedOrigin: origin,
+    expectedOrigin: String(req.headers.origin),
     expectedRPID: String(process.env.CLIENT_HOST),
     credential: {
       id: passkey.id,
