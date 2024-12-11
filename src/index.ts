@@ -156,8 +156,6 @@ const saveUpdatedCounter = (passkey: Passkey, newCounter: number) => {
 
 // registration
 const rpName = 'Stuff Control';
-const rpID = 'localhost';
-const origin = `http://${rpID}:5173`;
 
 server.post<{
   Body: { username: string };
@@ -172,7 +170,7 @@ server.post<{
   const options: PublicKeyCredentialCreationOptionsJSON =
     await generateRegistrationOptions({
       rpName,
-      rpID,
+      rpID: req.host,
       userName: username,
       attestationType: 'none',
       excludeCredentials: userPasskeys.map((passkey) => ({
@@ -208,8 +206,8 @@ server.post<{
   const verification = await verifyRegistrationResponse({
     response: credential,
     expectedChallenge: currentOptions.challenge,
-    expectedOrigin: origin,
-    expectedRPID: rpID,
+    expectedOrigin: String(req.headers.origin),
+    expectedRPID: req.host,
   });
 
   if (!verification.verified)
@@ -231,7 +229,7 @@ server.post<{
 
   const options: PublicKeyCredentialRequestOptionsJSON =
     await generateAuthenticationOptions({
-      rpID,
+      rpID: req.host,
       allowCredentials: userPasskeys.map((passkey) => ({
         id: passkey.id,
         type: passkey.transports,
@@ -259,7 +257,7 @@ server.post<{
     response: credential,
     expectedChallenge: currentOptions.challenge,
     expectedOrigin: origin,
-    expectedRPID: rpID,
+    expectedRPID: req.host,
     credential: {
       id: passkey.id,
       publicKey: passkey.publicKey,
