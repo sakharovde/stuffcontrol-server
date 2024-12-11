@@ -1,4 +1,5 @@
 import fastify from 'fastify';
+import cors from '@fastify/cors';
 import {
   generateAuthenticationOptions,
   generateRegistrationOptions,
@@ -19,6 +20,8 @@ import {
 const server = fastify({
   logger: true,
 });
+
+server.register(cors);
 
 server.get('/ping', async (request, reply) => {
   return 'pong\n';

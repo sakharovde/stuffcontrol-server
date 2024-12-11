@@ -16,6 +16,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fastify/cors@npm:^10.0.1":
+  version: 10.0.1
+  resolution: "@fastify/cors@npm:10.0.1"
+  dependencies:
+    fastify-plugin: "npm:^5.0.0"
+    mnemonist: "npm:0.39.8"
+  checksum: 10c0/95aec2445b25a7df09bab557800a07245b58a00661b693bb04b8083d4c66b48f11696ca334d1488cff6aebbf8cbe2ae09d462972ac12502ba49a360662a249ba
+  languageName: node
+  linkType: hard
+
 "@fastify/error@npm:^4.0.0":
   version: 4.0.0
   resolution: "@fastify/error@npm:4.0.0"
@@ -990,6 +1000,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fastify-plugin@npm:^5.0.0":
+  version: 5.0.1
+  resolution: "fastify-plugin@npm:5.0.1"
+  checksum: 10c0/c5e5932e7b8c5713ff881adeade3e8ee8fc288e8249d79cd193a2a2438eef1ad58ae5814f12835acbf04025dbddf2628787cd845f3e550dee847f494a08f7c5b
+  languageName: node
+  linkType: hard
+
 "fastify@npm:^5.1.0":
   version: 5.1.0
   resolution: "fastify@npm:5.1.0"
@@ -1704,6 +1721,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mnemonist@npm:0.39.8":
+  version: 0.39.8
+  resolution: "mnemonist@npm:0.39.8"
+  dependencies:
+    obliterator: "npm:^2.0.1"
+  checksum: 10c0/fa810768d290919c4ecd3f8ba5c8458bc45df08d1c72fac8f3897721cd90ab42ee1c642cc5208cfd649d40222998dc011127702117c0ca676f243cc80f42cc11
+  languageName: node
+  linkType: hard
+
 "module-details-from-path@npm:^1.0.3":
   version: 1.0.3
   resolution: "module-details-from-path@npm:1.0.3"
@@ -1820,6 +1846,13 @@ __metadata:
     eventemitter2: "npm:~0.4.14"
     lazy: "npm:~1.0.11"
   checksum: 10c0/d30067b89781f6fc2e0297ccf06ea4beb0648afab02806d9133f4acf227d5dffee203d7d6204414b8b6c896946021944a7d2ac03700ec2d0f21ff04a51dbd90a
+  languageName: node
+  linkType: hard
+
+"obliterator@npm:^2.0.1":
+  version: 2.0.4
+  resolution: "obliterator@npm:2.0.4"
+  checksum: 10c0/ff2c10d4de7d62cd1d588b4d18dfc42f246c9e3a259f60d5716f7f88e5b3a3f79856b3207db96ec9a836a01d0958a21c15afa62a3f4e73a1e0b75f2c2f6bab40
   languageName: node
   linkType: hard
 
@@ -2600,6 +2633,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "stuff-control-server@workspace:."
   dependencies:
+    "@fastify/cors": "npm:^10.0.1"
     "@simplewebauthn/server": "npm:^12.0.0"
     "@simplewebauthn/types": "npm:^12.0.0"
     "@types/node": "npm:^22.10.1"
