@@ -1,9 +1,4 @@
-import {
-  FastifyInstance,
-  RouteGenericInterface,
-  RouteHandler,
-  RouteOptions,
-} from 'fastify';
+import { RouteGenericInterface, RouteHandler } from 'fastify';
 import { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/types';
 import { UserModel } from '../types/user-model';
 import getUserFromDB from '../helpers/getUserFromDB';
