@@ -1,9 +1,11 @@
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import registrationHandler from './auth/handlers/registration';
-import verifyRegistrationHandler from './auth/handlers/verifyRegistration';
-import authenticationHandler from './auth/handlers/authentication';
-import verifyAuthenticationHandler from './auth/handlers/verifyAuthentication';
+import registrationHandler from './app/auth/handlers/registration';
+import verifyRegistrationHandler from './app/auth/handlers/verifyRegistration';
+import authenticationHandler from './app/auth/handlers/authentication';
+import verifyAuthenticationHandler from './app/auth/handlers/verifyAuthentication';
+import getPrisma from './db/getPrisma';
+import { getProductHistory } from '@prisma/client/sql';
 
 const server = fastify({
   logger: true,
@@ -11,8 +13,12 @@ const server = fastify({
 
 server.register(cors);
 
-server.get('/ping', async (request, reply) => {
-  return 'pong\n';
+server.route({
+  method: 'GET',
+  url: '/ping',
+  handler: async () => {
+    return 'pong\n';
+  },
 });
 
 // registration
@@ -40,6 +46,20 @@ server
     url: '/api/authenticate/verify',
     handler: verifyAuthenticationHandler,
   });
+
+server.route({
+  method: 'GET',
+  url: '/test',
+  handler: async () => {
+    const prisma = getPrisma();
+
+    return prisma.$queryRawTyped(getProductHistory('test'));
+  },
+});
+
+server.ready().then(async () => {
+  await getPrisma().$disconnect();
+});
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 const host = 'RENDER' in process.env ? `0.0.0.0` : `localhost`;
