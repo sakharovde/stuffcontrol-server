@@ -17,8 +17,8 @@ datasource db {
 model ProductHistory {
   id        String   @id @default(uuid())
   storageId String
-  productId String
-  batchId   String
+  productId String?
+  batchId   String?
   eventType String
   eventDate DateTime
   data      Json
