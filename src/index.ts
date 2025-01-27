@@ -1,17 +1,18 @@
+import 'dotenv/config';
 import fastify, { RouteGenericInterface } from 'fastify';
-import cors from '@fastify/cors';
+import fastifyCors from '@fastify/cors';
 import registrationHandler from './app/auth/handlers/registration';
 import verifyRegistrationHandler from './app/auth/handlers/verifyRegistration';
 import authenticationHandler from './app/auth/handlers/authentication';
 import verifyAuthenticationHandler from './app/auth/handlers/verifyAuthentication';
-import postgresPlugin from '@fastify/postgres';
+import fastifyPostgres from '@fastify/postgres';
 
 const server = fastify({
   logger: true,
 });
 
-server.register(cors);
-server.register(postgresPlugin, {
+server.register(fastifyCors);
+server.register(fastifyPostgres, {
   database: process.env.DATABASE_NAME,
   user: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
