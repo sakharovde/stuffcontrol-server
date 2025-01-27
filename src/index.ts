@@ -4,14 +4,22 @@ import registrationHandler from './app/auth/handlers/registration';
 import verifyRegistrationHandler from './app/auth/handlers/verifyRegistration';
 import authenticationHandler from './app/auth/handlers/authentication';
 import verifyAuthenticationHandler from './app/auth/handlers/verifyAuthentication';
-import getPrisma from './db/getPrisma';
-import { getProductHistory } from '@prisma/client/sql';
+import postgresPlugin from '@fastify/postgres';
 
 const server = fastify({
   logger: true,
 });
 
 server.register(cors);
+server.register(postgresPlugin, {
+  database: process.env.DATABASE_NAME,
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  port: Number(process.env.DATABASE_PORT),
+  host: process.env.DATABASE_HOST,
+});
+
+console.log(process.env);
 
 server.route({
   method: 'GET',
@@ -51,11 +59,7 @@ server.route({
   method: 'GET',
   url: '/test',
   handler: async () => {
-    const prisma = getPrisma();
-
-    return prisma.$queryRawTyped(
-      getProductHistory('eca09b7b-200e-4c11-96bb-ddbf031faa4d')
-    );
+    return server.pg.query('SELECT * FROM "ProductHistory"');
   },
 });
 
@@ -89,50 +93,47 @@ server.route<SyncRoute>({
   method: 'POST',
   url: '/sync',
   handler: async (req) => {
-    const prisma = getPrisma();
-
-    const storageId = req.body.storageId;
-    const mapBodyItemToData = (body: ProductHistoryItem) => ({
-      storageId: body.storageId || storageId,
-      productId: body.productId,
-      batchId: body.batchId,
-      eventType: body.eventType,
-      eventDate: body.eventDate,
-      data: {
-        ...(body.quantity ? { quantity: body.quantity } : {}),
-        ...(body.productName ? { productName: body.productName } : {}),
-        ...(body.storageName ? { storageName: body.storageName } : {}),
-        ...(body.expiryDate ? { expiryDate: body.expiryDate } : {}),
-        ...(body.manufactureDate
-          ? { manufactureDate: body.manufactureDate }
-          : {}),
-      },
-    });
-
-    await prisma.productHistory.createMany({
-      data: req.body.events.map(mapBodyItemToData),
-    });
-    const snapshot = await prisma.$queryRawTyped(getProductHistory(storageId));
-    const syncSession = await prisma.syncSession.create({
-      data: {
-        storageId,
-        snapshot,
-      },
-    });
-    await prisma.productHistory.updateMany({
-      where: { syncSessionId: null },
-      data: { syncSessionId: syncSession.id },
-    });
-
-    return prisma.syncSession.findFirst({
-      where: { id: syncSession.id },
-      include: { productEvents: true },
-    });
+    // const prisma = getPrisma();
+    //
+    // const storageId = req.body.storageId;
+    // const mapBodyItemToData = (body: ProductHistoryItem) => ({
+    //   storageId: body.storageId || storageId,
+    //   productId: body.productId,
+    //   batchId: body.batchId,
+    //   eventType: body.eventType,
+    //   eventDate: body.eventDate,
+    //   data: {
+    //     ...(body.quantity ? { quantity: body.quantity } : {}),
+    //     ...(body.productName ? { productName: body.productName } : {}),
+    //     ...(body.storageName ? { storageName: body.storageName } : {}),
+    //     ...(body.expiryDate ? { expiryDate: body.expiryDate } : {}),
+    //     ...(body.manufactureDate
+    //       ? { manufactureDate: body.manufactureDate }
+    //       : {}),
+    //   },
+    // });
+    //
+    // await prisma.productHistory.createMany({
+    //   data: req.body.events.map(mapBodyItemToData),
+    // });
+    // const snapshot = await prisma.$queryRawTyped(getProductHistory(storageId));
+    // const syncSession = await prisma.syncSession.create({
+    //   data: {
+    //     storageId,
+    //     snapshot,
+    //   },
+    // });
+    // await prisma.productHistory.updateMany({
+    //   where: { syncSessionId: null },
+    //   data: { syncSessionId: syncSession.id },
+    // });
+    //
+    // return prisma.syncSession.findFirst({
+    //   where: { id: syncSession.id },
+    //   include: { productEvents: true },
+    // });
+    return [];
   },
-});
-
-server.ready().then(async () => {
-  await getPrisma().$disconnect();
 });
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
