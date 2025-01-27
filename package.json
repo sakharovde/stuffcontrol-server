@@ -5,19 +5,24 @@
     "dev": "FORCE_COLOR=1 pm2-runtime ecosystem.config.cjs",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "typeorm": "typeorm-ts-node-commonjs"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",
-    "@fastify/postgres": "^6.0.2",
     "@simplewebauthn/server": "^12.0.0",
+    "camelcase": "^8.0.0",
+    "camelcase-keys": "^9.1.3",
+    "decamelize": "^6.0.0",
+    "decamelize-keys": "^2.0.1",
     "dotenv": "^16.4.7",
     "fastify": "^5.1.0",
     "pg": "^8.13.1",
-    "postgrator": "^8.0.0"
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.20"
   },
   "devDependencies": {
     "@simplewebauthn/types": "^12.0.0",
@@ -27,6 +32,7 @@
     "lint-staged": "^15.2.10",
     "pm2": "^5.4.3",
     "prettier": "3.4.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
   }
 }
