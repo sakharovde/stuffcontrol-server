@@ -52,7 +52,22 @@ const getProductsHistoryQuery = () => {
                           FROM updated_batches ub
                                    FULL JOIN
                                latest_snaphot ls ON ub.storage_id = ls.storage_id -- соединяем, чтобы учесть всё из снепшота и истории
-                          WHERE ub.quantity > 0)
+                          WHERE ub.quantity > 0
+                          UNION ALL
+                          SELECT ls.storage_id,
+                                 ls.batch_id,
+                                 ls.product_id,
+                                 ls.product_name,
+                                 CAST(ls.quantity AS numeric),
+                                 date(ls.expiry_date),
+                                 date(ls.manufacture_date),
+                                 ls.shelf_life_days
+                          FROM latest_snaphot ls
+                          WHERE NOT EXISTS (SELECT 1
+                                            FROM updated_batches ub
+                                            WHERE ub.storage_id = ls.storage_id
+                                              AND ub.batch_id = ls.batch_id
+                                              AND ub.product_id = ls.product_id))
       select *
       from finalState
   `;
