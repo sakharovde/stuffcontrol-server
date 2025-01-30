@@ -41,35 +41,37 @@ const getProductsHistoryQuery = () => {
                                       MAX(h.shelf_life_days)  AS shelf_life_days
                                FROM history_after_snapshot h
                                GROUP BY h.product_id, h.batch_id, h.storage_id),
-           finalState AS (SELECT ub.storage_id,
-                                 ub.batch_id,
-                                 ub.product_id,
-                                 ub.product_name,
-                                 ub.quantity,
-                                 ub.expiry_date,
-                                 ub.manufacture_date,
-                                 ub.shelf_life_days
-                          FROM updated_batches ub
-                                   FULL JOIN
-                               latest_snaphot ls ON ub.storage_id = ls.storage_id -- соединяем, чтобы учесть всё из снепшота и истории
-                          WHERE ub.quantity > 0
-                          UNION ALL
-                          SELECT ls.storage_id,
-                                 ls.batch_id,
-                                 ls.product_id,
-                                 ls.product_name,
-                                 CAST(ls.quantity AS numeric),
-                                 date(ls.expiry_date),
-                                 date(ls.manufacture_date),
-                                 ls.shelf_life_days
-                          FROM latest_snaphot ls
-                          WHERE NOT EXISTS (SELECT 1
-                                            FROM updated_batches ub
-                                            WHERE ub.storage_id = ls.storage_id
-                                              AND ub.batch_id = ls.batch_id
-                                              AND ub.product_id = ls.product_id))
+           all_batches AS (SELECT ub.storage_id,
+                                  ub.batch_id,
+                                  ub.product_id,
+                                  ub.product_name,
+                                  CAST(ub.quantity AS numeric) AS quantity,
+                                  date(ub.expiry_date)         AS expiry_date,
+                                  date(ub.manufacture_date)    AS manufacture_date,
+                                  ub.shelf_life_days
+                           FROM updated_batches ub
+                           UNION ALL
+                           SELECT ls.storage_id,
+                                  ls.batch_id,
+                                  ls.product_id,
+                                  ls.product_name,
+                                  CAST(ls.quantity AS numeric) AS quantity,
+                                  date(ls.expiry_date)         AS expiry_date,
+                                  date(ls.manufacture_date)    AS manufacture_date,
+                                  ls.shelf_life_days
+                           FROM latest_snaphot ls),
+           final_state AS (SELECT ab.storage_id,
+                                  ab.product_id,
+                                  ab.product_name,
+                                  ab.batch_id,
+                                  SUM(ab.quantity) as quantity,
+                                  ab.expiry_date,
+                                  ab.manufacture_date,
+                                  ab.shelf_life_days
+                           FROM all_batches ab
+                           GROUP BY ab.storage_id, ab.product_id, ab.batch_id, ab.product_name, ab.expiry_date, ab.manufacture_date, ab.shelf_life_days)
       select *
-      from finalState
+      from final_state
   `;
 };
 
