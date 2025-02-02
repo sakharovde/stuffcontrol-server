@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    hostname: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./.db/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: stuffcontrol_dev_user
+      POSTGRES_DB: stuffcontrol_dev
+      POSTGRES_PASSWORD: stuffcontrol_dev_password
+    networks:
+      - stuffcontrol_dev
+networks:
+  stuffcontrol_dev:
+    driver: bridge
