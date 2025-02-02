@@ -1,13 +1,14 @@
-import fastify, { RouteGenericInterface } from 'fastify';
+import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import registrationHandler from './auth/handlers/registration';
 import verifyRegistrationHandler from './auth/handlers/verifyRegistration';
 import authenticationHandler from './auth/handlers/authentication';
 import verifyAuthenticationHandler from './auth/handlers/verifyAuthentication';
-import DBDataSource from '../db/data-source';
-import StorageEvent from '../db/entities/storage-event';
-import getProductsHistoryQuery from '../db/queries/getProductHistory.query';
-import SyncSession from '../db/entities/sync-session';
+import createSyncSessionHandler from './sync-sessions/handlers/create';
+import allStorageEventsHandler from './storage-events/handlers/all';
+import allSyncSessionsHandler from './sync-sessions/handlers/all';
+import allProductsHandler from './products/handlers/all';
+import allBatchesHandler from './batches/handlers/all';
 
 const server = fastify({
   logger: true,
@@ -49,93 +50,38 @@ server
     handler: verifyAuthenticationHandler,
   });
 
+// storage events
 server.route({
   method: 'GET',
-  url: '/test',
-  handler: async () => {
-    return await DBDataSource.manager.query(getProductsHistoryQuery());
-  },
+  url: '/api/storage-events',
+  handler: allStorageEventsHandler,
 });
 
-export type ProductHistoryItem = {
-  id?: string;
-  storageId: string;
-  productId: string;
-  batchId: string;
-  eventType: StorageEvent['eventType'];
-  eventDate: Date | string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-  syncSessionId?: string | null;
-
-  // data: JsonNullValueInput | InputJsonValue;
-  quantity?: number;
-  productName?: string;
-  expiryDate?: string;
-  manufactureDate?: string;
-  storageName?: string;
-};
-
-interface SyncRoute extends RouteGenericInterface {
-  Body: {
-    storageId: string;
-    events: ProductHistoryItem[];
-  };
-}
-
-server.route<SyncRoute>({
-  method: 'POST',
-  url: '/sync',
-  handler: async (req) => {
-    const storageId = req.body.storageId;
-    const mapBodyItemToData = (body: ProductHistoryItem) => ({
-      storageId: body.storageId || storageId,
-      productId: body.productId,
-      batchId: body.batchId,
-      eventType: body.eventType,
-      eventDate: body.eventDate,
-      data: {
-        ...(body.quantity ? { quantity: body.quantity } : {}),
-        ...(body.productName ? { productName: body.productName } : {}),
-        ...(body.storageName ? { storageName: body.storageName } : {}),
-        ...(body.expiryDate ? { expiryDate: body.expiryDate } : {}),
-        ...(body.manufactureDate
-          ? { manufactureDate: body.manufactureDate }
-          : {}),
-      },
-    });
-
-    return DBDataSource.manager.transaction(
-      async (transactionEntityManager) => {
-        let storageEvents = await transactionEntityManager.create(
-          StorageEvent,
-          req.body.events.map(mapBodyItemToData)
-        );
-        storageEvents = await transactionEntityManager.save(storageEvents);
-
-        const snapshot = await transactionEntityManager.query(
-          getProductsHistoryQuery()
-        );
-        let syncSession = await transactionEntityManager.create(SyncSession, {
-          storageId,
-          snapshot,
-        });
-        syncSession = await transactionEntityManager.save(syncSession);
-
-        await transactionEntityManager.save(
-          storageEvents.map((event) => {
-            event.syncSession = syncSession;
-            return event;
-          })
-        );
-
-        return await transactionEntityManager.findOne(SyncSession, {
-          where: { id: syncSession.id },
-          relations: ['storageEvents'],
-        });
-      }
-    );
-  },
+// products
+server.route({
+  method: 'GET',
+  url: '/api/products',
+  handler: allProductsHandler,
 });
+
+// batches
+server.route({
+  method: 'GET',
+  url: '/api/batches',
+  handler: allBatchesHandler,
+});
+
+// sync sessions
+server
+  .route({
+    method: 'GET',
+    url: '/api/sync-sessions',
+    handler: allSyncSessionsHandler,
+  })
+  .route({
+    method: 'POST',
+    url: '/api/sync-session',
+    handler: createSyncSessionHandler,
+  });
 
 export default server;
