@@ -105,32 +105,36 @@ server.route<SyncRoute>({
       },
     });
 
-    let storageEvents = await DBDataSource.manager.create(
-      StorageEvent,
-      req.body.events.map(mapBodyItemToData)
-    );
-    storageEvents = await DBDataSource.manager.save(storageEvents);
+    return DBDataSource.manager.transaction(
+      async (transactionEntityManager) => {
+        let storageEvents = await transactionEntityManager.create(
+          StorageEvent,
+          req.body.events.map(mapBodyItemToData)
+        );
+        storageEvents = await transactionEntityManager.save(storageEvents);
 
-    const snapshot = await DBDataSource.manager.query(
-      getProductsHistoryQuery()
-    );
-    let syncSession = await DBDataSource.manager.create(SyncSession, {
-      storageId,
-      snapshot,
-    });
-    syncSession = await DBDataSource.manager.save(syncSession);
+        const snapshot = await transactionEntityManager.query(
+          getProductsHistoryQuery()
+        );
+        let syncSession = await transactionEntityManager.create(SyncSession, {
+          storageId,
+          snapshot,
+        });
+        syncSession = await transactionEntityManager.save(syncSession);
 
-    await DBDataSource.manager.save(
-      storageEvents.map((event) => {
-        event.syncSession = syncSession;
-        return event;
-      })
-    );
+        await transactionEntityManager.save(
+          storageEvents.map((event) => {
+            event.syncSession = syncSession;
+            return event;
+          })
+        );
 
-    return await DBDataSource.manager.findOne(SyncSession, {
-      where: { id: syncSession.id },
-      relations: ['storageEvents'],
-    });
+        return await transactionEntityManager.findOne(SyncSession, {
+          where: { id: syncSession.id },
+          relations: ['storageEvents'],
+        });
+      }
+    );
   },
 });
 
