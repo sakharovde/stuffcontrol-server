@@ -1,9 +1,9 @@
 import DBDataSource from '../../../db/data-source';
 import { RouteGenericInterface, RouteHandler } from 'fastify';
-import getAllBatchesQuery from '../../../db/queries/getAllBatches.query';
+import getAllProductsQuery from '../../../db/queries/getAllProducts.query';
 
 const handler: RouteHandler<RouteGenericInterface> = async () => {
-  return await DBDataSource.manager.query(getAllBatchesQuery());
+  return await DBDataSource.manager.query(getAllProductsQuery());
 };
 
 export default handler;
