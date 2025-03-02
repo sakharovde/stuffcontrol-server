@@ -4,7 +4,6 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "type": "module",
   "scripts": {
     "dev": "FORCE_COLOR=1 pm2-runtime ecosystem.config.cjs",
     "build": "tsc -p tsconfig.json",
