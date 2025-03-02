@@ -14,6 +14,37 @@ describe('Sync Sessions', () => {
     });
   });
 
+  describe('create storage', () => {
+    it('should create empty storage', async () => {
+      const storageId = faker.string.uuid();
+      const storageName = faker.commerce.department();
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/sync-session',
+        body: {
+          storageId,
+          events: [
+            {
+              storageId,
+              eventType: 'createStorage',
+              storageName: storageName,
+              eventDate: faker.date.recent().toISOString(),
+            },
+          ],
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()?.storageId).toEqual(storageId);
+      expect(response.json()?.snapshot?.length).toEqual(0);
+      expect(response.json()?.storageEvents?.length).toEqual(1);
+      expect(response.json()?.storageEvents[0].data).toEqual({
+        storageName,
+      });
+    });
+  });
+
   it('should return 200 when products were added', async () => {
     const response = await app.inject({
       method: 'POST',

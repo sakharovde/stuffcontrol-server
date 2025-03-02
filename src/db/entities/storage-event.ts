@@ -13,10 +13,10 @@ export default class StorageEvent {
   @Column('uuid')
   storageId: string;
 
-  @Column('uuid')
+  @Column('uuid', { nullable: true })
   productId: string;
 
-  @Column('uuid')
+  @Column('uuid', { nullable: true })
   batchId: string;
 
   @Column('varchar', {

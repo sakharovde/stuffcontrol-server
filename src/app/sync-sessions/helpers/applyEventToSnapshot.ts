@@ -21,22 +21,21 @@ const applyEventToSnapshot = (
               }
             : item
         );
-      } else {
-        // Создаём новый продукт
-        return [
-          ...snapshot,
-          {
-            productId: event.productId!,
-            batchId: event.batchId!,
-            storageId: event.storageId!,
-            productName: event.data.productName || 'Unknown',
-            quantity: Number(event.data.quantity || 0),
-            expiryDate: event.data.expiryDate || undefined,
-            manufactureDate: event.data.manufactureDate || undefined,
-            shelfLifeDays: event.data.shelfLifeDays || undefined,
-          },
-        ];
       }
+
+      return [
+        ...snapshot,
+        {
+          productId: event.productId!,
+          batchId: event.batchId!,
+          storageId: event.storageId!,
+          productName: event.data.productName || 'Unknown',
+          quantity: Number(event.data.quantity || 0),
+          expiryDate: event.data.expiryDate || undefined,
+          manufactureDate: event.data.manufactureDate || undefined,
+          shelfLifeDays: event.data.shelfLifeDays || undefined,
+        },
+      ];
     }
 
     case 'removeProducts': {
@@ -60,37 +59,6 @@ const applyEventToSnapshot = (
           ? {
               ...item,
               productName: event.data.productName || item.productName,
-            }
-          : item
-      );
-    }
-
-    case 'createStorage': {
-      if (!snapshot.some((item) => item.storageId === event.storageId)) {
-        return [
-          ...snapshot,
-          {
-            productId: '',
-            batchId: '',
-            storageId: event.storageId!,
-            productName: '',
-            quantity: 0,
-          },
-        ];
-      }
-      return snapshot;
-    }
-
-    case 'deleteStorage': {
-      return snapshot.filter((item) => item.storageId !== event.storageId);
-    }
-
-    case 'changeStorageName': {
-      return snapshot.map((item) =>
-        item.storageId === event.storageId
-          ? {
-              ...item,
-              productName: event.data.storageName || item.productName,
             }
           : item
       );

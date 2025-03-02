@@ -14,11 +14,12 @@ const handler: RouteHandler<RouteGenericInterface> = async () => {
 
   return await storageEventsRepository
     .createQueryBuilder('se')
-    .select('se.productId', 'productId')
+    .select('se.product_id', 'productId')
     .addSelect("MAX(se.data ->> 'product_name')", 'productName')
     .addSelect("MAX(se.data ->> 'shelf_life_days')", 'shelfLifeDays')
-    .addSelect('MIN(se.createdAt)', 'createdAt')
-    .groupBy('se.productId')
+    .addSelect('MIN(se.created_at)', 'createdAt')
+    .where('se.product_id IS NOT NULL')
+    .groupBy('se.product_id')
     .getRawMany<ProductInfo>();
 };
 
