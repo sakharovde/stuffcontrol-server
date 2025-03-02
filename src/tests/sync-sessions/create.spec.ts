@@ -38,5 +38,6 @@ describe('Sync Sessions', () => {
     });
 
     expect(response.statusCode).toBe(200);
+    expect(response.json()?.snapshot?.length).toEqual(1);
   });
 });

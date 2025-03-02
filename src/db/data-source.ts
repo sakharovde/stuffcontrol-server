@@ -12,7 +12,7 @@ const DBDataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   synchronize: true,
-  logging: process.env.NODE_ENV !== 'test',
+  logging: process.env.NODE_ENV === 'test',
   entities: [StorageEvent, SyncSession],
   migrations: [],
   subscribers: [],

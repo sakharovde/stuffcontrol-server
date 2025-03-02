@@ -41,19 +41,17 @@ export default class StorageEvent {
     },
   })
   data: {
-    expiryDate?: Date;
-    manufactureDate?: Date;
+    expiryDate?: string;
+    manufactureDate?: string;
     productName?: string;
     quantity?: number;
     shelfLifeDays?: number;
     storageName?: string;
   };
 
-  @Column('date', { default: () => 'CURRENT_TIMESTAMP' })
+  @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @ManyToOne(() => SyncSession, (syncSession) => syncSession.storageEvents, {
-    nullable: true,
-  })
+  @ManyToOne(() => SyncSession, (syncSession) => syncSession.storageEvents)
   syncSession: SyncSession;
 }

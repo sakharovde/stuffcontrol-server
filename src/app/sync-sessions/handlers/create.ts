@@ -2,7 +2,7 @@ import { RouteGenericInterface, RouteHandler } from 'fastify';
 import DBDataSource from '../../../db/data-source';
 import SyncSession from '../../../db/entities/sync-session';
 import StorageEvent from '../../../db/entities/storage-event';
-import getAllBatchesQuery from '../../../db/queries/getAllBatches.query';
+import applyEventToSnapshot from '../helpers/applyEventToSnapshot';
 
 export type ProductHistoryItem = {
   id?: string;
@@ -56,31 +56,37 @@ const handler: RouteHandler<SyncRoute> = async (req, reply) => {
     },
   });
 
-  return DBDataSource.manager.transaction(async (transactionEntityManager) => {
-    let storageEvents = await transactionEntityManager.create(
-      StorageEvent,
-      req.body.events.map(mapBodyItemToData)
-    );
-    storageEvents = await transactionEntityManager.save(storageEvents);
+  let newStorageEvents = DBDataSource.manager.create(
+    StorageEvent,
+    req.body.events.map(mapBodyItemToData)
+  );
 
-    const snapshot = await transactionEntityManager.query(getAllBatchesQuery());
-    let syncSession = await transactionEntityManager.create(SyncSession, {
+  const latestSyncSession = await DBDataSource.manager.findOne(SyncSession, {
+    where: { storageId },
+    order: { createdAt: 'DESC' },
+  });
+  const latestSnapshot = latestSyncSession?.snapshot || [];
+
+  const newSnapshot = newStorageEvents.reduce(
+    (snapshot, event) => applyEventToSnapshot(snapshot, event),
+    latestSnapshot
+  );
+
+  await DBDataSource.manager.transaction(async (transactionEntityManager) => {
+    newStorageEvents = await transactionEntityManager.save(newStorageEvents);
+
+    let newSyncSession = DBDataSource.manager.create(SyncSession, {
       storageId,
-      snapshot,
+      snapshot: newSnapshot,
+      storageEvents: newStorageEvents,
     });
-    syncSession = await transactionEntityManager.save(syncSession);
+    await transactionEntityManager.save(newSyncSession);
+  });
 
-    await transactionEntityManager.save(
-      storageEvents.map((event) => {
-        event.syncSession = syncSession;
-        return event;
-      })
-    );
-
-    return await transactionEntityManager.findOne(SyncSession, {
-      where: { id: syncSession.id },
-      relations: ['storageEvents'],
-    });
+  return DBDataSource.manager.findOne(SyncSession, {
+    where: { storageId },
+    order: { createdAt: 'DESC' },
+    relations: ['storageEvents'],
   });
 };
 
