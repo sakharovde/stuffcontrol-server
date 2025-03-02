@@ -10,16 +10,16 @@ export default class StorageEvent {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('uuid')
   storageId: string;
 
-  @Column()
+  @Column('uuid')
   productId: string;
 
-  @Column()
+  @Column('uuid')
   batchId: string;
 
-  @Column({
+  @Column('varchar', {
     transformer: {
       from: (value: string) => (value ? camelcase(value) : value),
       to: (value: string) => (value ? decamelize(value) : value),
@@ -49,9 +49,11 @@ export default class StorageEvent {
     storageName?: string;
   };
 
-  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  @Column('date', { default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @ManyToOne(() => SyncSession, (syncSession) => syncSession.storageEvents)
+  @ManyToOne(() => SyncSession, (syncSession) => syncSession.storageEvents, {
+    nullable: true,
+  })
   syncSession: SyncSession;
 }

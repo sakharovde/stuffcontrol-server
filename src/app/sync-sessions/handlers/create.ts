@@ -32,8 +32,15 @@ interface SyncRoute extends RouteGenericInterface {
 
 const handler: RouteHandler<SyncRoute> = async (req, reply) => {
   const storageId = req.body.storageId;
+
+  if (!req.body.events || !req.body.events?.length) {
+    return reply.status(400).send({
+      message: 'At least one event must be provided',
+    });
+  }
+
   const mapBodyItemToData = (body: ProductHistoryItem) => ({
-    storageId: body.storageId || storageId,
+    storageId: storageId,
     productId: body.productId,
     batchId: body.batchId,
     eventType: body.eventType,

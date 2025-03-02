@@ -13,9 +13,9 @@ const getAllBatchesQuery = () => `
                                    data ->> 'shelf_life_days'  as shelf_life_days
                             from latest_sync_session,
                                  jsonb_array_elements(latest_sync_session.snapshot) AS role(data)),
-         history_after_snapshot AS (SELECT product_id,
-                                           batch_id,
-                                           storage_id,
+         history_after_snapshot AS (SELECT text(product_id) as product_id,
+                                           text(batch_id) as batch_id,
+                                           text(storage_id) as storage_id,
                                            event_type,
                                            created_at,
                                            data ->> 'quantity'               AS quantity,
@@ -24,7 +24,7 @@ const getAllBatchesQuery = () => `
                                            date(data ->> 'expiry_date')      AS expiry_date,
                                            date(data ->> 'manufacture_date') AS manufacture_date
                                     FROM storage_event se
-                                    WHERE se."syncSessionId" is null),
+                                    WHERE se."sync_session_id" is null),
          updated_batches AS (SELECT h.product_id,
                                     h.batch_id,
                                     h.storage_id,

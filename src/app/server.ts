@@ -11,7 +11,7 @@ import allProductsHandler from './products/handlers/all';
 import allBatchesHandler from './batches/handlers/all';
 
 const server = fastify({
-  logger: true,
+  logger: process.env.NODE_ENV !== 'test',
 });
 
 server.register(fastifyCors);

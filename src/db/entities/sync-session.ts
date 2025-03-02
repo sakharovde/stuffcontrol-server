@@ -8,7 +8,7 @@ export default class SyncSession {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('uuid')
   storageId: string;
 
   @Column({
@@ -29,7 +29,7 @@ export default class SyncSession {
     shelfLifeDays?: string;
   }>;
 
-  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  @Column('date', { default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   @OneToMany(() => StorageEvent, (storageEvent) => storageEvent.syncSession)
