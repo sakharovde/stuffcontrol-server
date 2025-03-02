@@ -1,8 +1,10 @@
-FROM node:23.1.0 as build
+FROM node:23-alpine
 
 COPY . /app
 WORKDIR /app
 RUN yarn install
 RUN yarn build
 
-ENTRYPOINT ["node", "dist/index.js"]
+EXPOSE 3000
+
+CMD ["node", "index.js"]
