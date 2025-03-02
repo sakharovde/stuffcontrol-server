@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import StorageEvent from './entities/storage-event';
 import SyncSession from './entities/sync-session';
 
@@ -15,6 +16,7 @@ const DBDataSource = new DataSource({
   entities: [StorageEvent, SyncSession],
   migrations: [],
   subscribers: [],
+  namingStrategy: new SnakeNamingStrategy(),
 });
 
 export default DBDataSource;

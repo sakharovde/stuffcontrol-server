@@ -3,16 +3,15 @@ import StorageEvent from './storage-event';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
-@Entity({ name: 'sync_session' })
+@Entity()
 export default class SyncSession {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'storage_id' })
+  @Column()
   storageId: string;
 
   @Column({
-    name: 'snapshot',
     type: 'jsonb',
     transformer: {
       from: (value) => (value ? camelcaseKeys(value, { deep: true }) : value),
@@ -30,7 +29,7 @@ export default class SyncSession {
     shelfLifeDays?: string;
   }>;
 
-  @Column({ name: 'created_at', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   @OneToMany(() => StorageEvent, (storageEvent) => storageEvent.syncSession)

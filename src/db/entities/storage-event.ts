@@ -5,22 +5,21 @@ import camelcase from 'camelcase';
 import camelcaseKeys from 'camelcase-keys';
 import decamelizeKeys from 'decamelize-keys';
 
-@Entity({ name: 'storage_event' })
+@Entity()
 export default class StorageEvent {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'storage_id' })
+  @Column()
   storageId: string;
 
-  @Column({ name: 'product_id' })
+  @Column()
   productId: string;
 
-  @Column({ name: 'batch_id' })
+  @Column()
   batchId: string;
 
   @Column({
-    name: 'event_type',
     transformer: {
       from: (value: string) => (value ? camelcase(value) : value),
       to: (value: string) => (value ? decamelize(value) : value),
@@ -35,7 +34,6 @@ export default class StorageEvent {
     | 'changeStorageName';
 
   @Column({
-    name: 'data',
     type: 'jsonb',
     transformer: {
       from: (value) => (value ? camelcaseKeys(value) : value),
@@ -51,7 +49,7 @@ export default class StorageEvent {
     storageName?: string;
   };
 
-  @Column({ name: 'created_at', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   @ManyToOne(() => SyncSession, (syncSession) => syncSession.storageEvents)

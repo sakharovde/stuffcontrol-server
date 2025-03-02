@@ -3219,6 +3219,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     ts-node: "npm:^10.9.2"
     typeorm: "npm:^0.3.20"
+    typeorm-naming-strategies: "npm:^4.1.0"
     typescript: "npm:^5.7.2"
   languageName: unknown
   linkType: soft
@@ -3391,6 +3392,15 @@ __metadata:
   version: 4.33.0
   resolution: "type-fest@npm:4.33.0"
   checksum: 10c0/20015eea353605e08e3f4b967291b225fa4e7c43361de44f39b88131715e41877458af80da59c8f17e40c0e3842298996f0651219dc9823e35c7e46ecbc8a44f
+  languageName: node
+  linkType: hard
+
+"typeorm-naming-strategies@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "typeorm-naming-strategies@npm:4.1.0"
+  peerDependencies:
+    typeorm: ^0.2.0 || ^0.3.0
+  checksum: 10c0/090315d5a6c51849bc8ddcc603e4be89de225ed52fe399f84eb6533e056d42cff5cd99f2e41aab1931030fc0c12b444559343f32444b49a1a59e6dfcb22d7b99
   languageName: node
   linkType: hard
 
