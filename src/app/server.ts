@@ -9,6 +9,7 @@ import allStorageEventsHandler from './storage-events/handlers/all';
 import allSyncSessionsHandler from './sync-sessions/handlers/all';
 import allProductsHandler from './products/handlers/all';
 import allBatchesHandler from './batches/handlers/all';
+import allStoragesHandler from './storages/handlers/all';
 
 const server = fastify({
   logger: process.env.NODE_ENV !== 'test',
@@ -69,6 +70,13 @@ server.route({
   method: 'GET',
   url: '/api/batches',
   handler: allBatchesHandler,
+});
+
+// storages
+server.route({
+  method: 'GET',
+  url: '/api/storages',
+  handler: allStoragesHandler,
 });
 
 // sync sessions
