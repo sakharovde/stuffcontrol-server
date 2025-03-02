@@ -2,7 +2,7 @@
   "name": "stuff-control-server",
   "packageManager": "yarn@4.5.2",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "dev": "FORCE_COLOR=1 pm2-runtime ecosystem.config.cjs",
