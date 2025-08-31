@@ -14,7 +14,14 @@ const handler: RouteHandler<RouteGenericInterface> = async () => {
   return await storageEventsRepository
     .createQueryBuilder('se')
     .select('se.storage_id', 'storageId')
-    .addSelect("MAX(se.data ->> 'storage_name')", 'storageName')
+    .addSelect(
+      `(SELECT se2.data ->> 'storage_name'
+        FROM storage_event se2
+        WHERE se2.storage_id = se.storage_id
+        ORDER BY se2.created_at DESC
+        LIMIT 1)`,
+      'storageName'
+    )
     .addSelect('MIN(se.created_at)', 'createdAt')
     .groupBy('se.storage_id')
     .getRawMany<StorageInfo>();

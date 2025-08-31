@@ -11,13 +11,12 @@ let app: FastifyInstance;
 beforeAll(async () => {
   db = dataSource; // Если база данных инициализируется в app
   await db.initialize();
-  await db.synchronize(true); // Очистка перед тестами
+  await db.synchronize(); // Очистка перед тестами
 
   app = server;
   await app.ready();
 });
 
 afterAll(async () => {
-  await db.dropDatabase();
   await server.close();
 });

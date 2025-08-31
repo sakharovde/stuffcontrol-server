@@ -6,39 +6,71 @@ it('should create empty storage', async () => {
   const storageId = event.storageId;
   const storageName = event.storageName;
 
-  const response = await api.createSyncSession({
+  const syncSessionResponse = await api.createSyncSession({
     storageId,
     events: [event],
   });
 
-  expect(response.statusCode).toBe(200);
-  const json = response.json();
+  expect(syncSessionResponse.statusCode).toBe(200);
+  const syncSessionJson = syncSessionResponse.json();
 
-  expect(json?.storageId).toEqual(storageId);
-  expect(json?.snapshot?.length).toEqual(0);
-  expect(json?.storageEvents?.length).toEqual(1);
-  expect(json?.storageEvents[0].data).toEqual({
+  expect(syncSessionJson?.storageId).toEqual(storageId);
+  expect(syncSessionJson?.snapshot?.length).toEqual(0);
+  expect(syncSessionJson?.storageEvents?.length).toEqual(1);
+  expect(syncSessionJson?.storageEvents[0].data).toEqual({
     storageName,
   });
+
+  const storageListResponse = await api.getStorageList();
+
+  expect(storageListResponse.statusCode).toBe(200);
+  const storageListJson = storageListResponse.json();
+
+  expect(storageListJson?.length).toBeGreaterThan(0);
+  expect(storageListJson).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        storageId: event.storageId,
+        storageName: event.storageName,
+      }),
+    ])
+  );
 });
 
-it('should get created storage in storage list', async () => {
+it('should change storage name', async () => {
   const event = dto.events.createStorage();
   await api.createSyncSession({
     storageId: event.storageId,
     events: [event],
   });
-  const response = await api.getStorageList();
 
-  expect(response.statusCode).toBe(200);
-  const json = response.json();
+  const updateEvent = dto.events.changeStorageName();
+  updateEvent.storageId = event.storageId;
 
-  expect(json?.length).toBeGreaterThan(0);
-  expect(json).toEqual(
+  const syncSessionResponse = await api.createSyncSession({
+    storageId: updateEvent.storageId,
+    events: [updateEvent],
+  });
+
+  expect(syncSessionResponse.statusCode).toBe(200);
+  const syncSessionJson = syncSessionResponse.json();
+
+  expect(syncSessionJson?.storageId).toEqual(event.storageId);
+  expect(syncSessionJson?.storageEvents[0].data.storageName).toEqual(
+    updateEvent.storageName
+  );
+
+  const storageListResponse = await api.getStorageList();
+
+  expect(storageListResponse.statusCode).toBe(200);
+  const storageListJson = storageListResponse.json();
+
+  expect(storageListJson?.length).toBeGreaterThan(0);
+  expect(storageListJson).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         storageId: event.storageId,
-        storageName: event.storageName,
+        storageName: updateEvent.storageName,
       }),
     ])
   );
