@@ -17,9 +17,10 @@ it('should create a product', async () => {
 
 it('should return product in product list', async () => {
   const event = dto.events.addProduct();
+
   await api.createSyncSession({
     storageId: event.storageId,
-    events: [dto.events.addProduct()],
+    events: [event],
   });
   const response = await api.getProductList();
 
@@ -31,8 +32,8 @@ it('should return product in product list', async () => {
   expect(json).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        productId: expect.any(String),
-        productName: expect.any(String),
+        productId: event.productId,
+        productName: event.productName,
       }),
     ])
   );

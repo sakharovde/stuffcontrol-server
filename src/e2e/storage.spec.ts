@@ -37,9 +37,8 @@ it('should get created storage in storage list', async () => {
   expect(json).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        storageId: expect.any(String),
-        storageName: expect.any(String),
-        createdAt: expect.any(String),
+        storageId: event.storageId,
+        storageName: event.storageName,
       }),
     ])
   );
