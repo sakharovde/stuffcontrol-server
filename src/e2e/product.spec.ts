@@ -32,3 +32,45 @@ it('should create a product', async () => {
     ])
   );
 });
+
+it('should change product name', async () => {
+  // CREATE
+  const event = dto.events.addProduct();
+  await api.createSyncSession({
+    storageId: event.storageId,
+    events: [event],
+  });
+
+  // CHANGE
+  const updateEvent = dto.events.changeProductName();
+  updateEvent.storageId = event.storageId;
+  updateEvent.productId = event.productId;
+
+  const syncSessionResponse = await api.createSyncSession({
+    storageId: updateEvent.storageId,
+    events: [updateEvent],
+  });
+
+  expect(syncSessionResponse.statusCode).toBe(200);
+
+  const syncSessionJson = syncSessionResponse.json();
+
+  expect(syncSessionJson?.snapshot?.length).toEqual(1);
+
+  // GET
+  const productListResponse = await api.getProductList();
+
+  expect(productListResponse.statusCode).toBe(200);
+
+  const productListJson = productListResponse.json();
+
+  expect(productListJson?.length).toBeGreaterThan(0);
+  expect(productListJson).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        productId: event.productId,
+        productName: updateEvent.productName,
+      }),
+    ])
+  );
+});

@@ -2,7 +2,10 @@ import { dto } from '../dto';
 import app from '../../../app/server';
 
 type Event = ReturnType<
-  typeof dto.events.addProduct | typeof dto.events.createStorage
+  | typeof dto.events.createStorage
+  | typeof dto.events.changeStorageName
+  | typeof dto.events.addProduct
+  | typeof dto.events.changeProductName
 >;
 
 export const createSyncSession = (args: {
