@@ -5,6 +5,7 @@ type Event = ReturnType<
   | typeof dto.events.createStorage
   | typeof dto.events.changeStorageName
   | typeof dto.events.addProduct
+  | typeof dto.events.removeProduct
   | typeof dto.events.changeProductName
 >;
 

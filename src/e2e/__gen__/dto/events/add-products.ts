@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-export const addProduct = () => ({
+export const addProducts = () => ({
   storageId: faker.string.uuid(),
   productId: faker.string.uuid(),
   batchId: faker.string.uuid(),

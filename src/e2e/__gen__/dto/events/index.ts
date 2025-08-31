@@ -1,11 +1,13 @@
-import { addProduct } from './addProduct';
-import { createStorage } from './createStorage';
-import { changeStorageName } from './changeStorageName';
-import { changeProductName } from './changeProductName';
+import { addProducts } from './add-products';
+import { createStorage } from './create-storage';
+import { changeStorageName } from './change-storage-name';
+import { changeProductName } from './change-product-name';
+import { removeProducts } from './remove-products';
 
 export const events = {
-  addProduct,
+  addProduct: addProducts,
   createStorage,
   changeStorageName,
   changeProductName,
+  removeProduct: removeProducts,
 };
