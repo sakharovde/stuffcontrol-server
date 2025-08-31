@@ -1,10 +1,9 @@
-import { createEmptyStorage, createStorage } from './create-storage';
 import { getStorageList } from './get-storage-list';
-import { addProduct } from './add-product';
+import { createSyncSession } from './create-sync-session';
+import { getProductList } from './get-product-list';
 
 export const api = {
-  createEmptyStorage,
-  createStorage,
+  getProductList,
   getStorageList,
-  addProduct,
+  createSyncSession,
 };

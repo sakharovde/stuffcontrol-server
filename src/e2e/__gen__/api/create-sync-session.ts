@@ -1,9 +1,13 @@
 import { dto } from '../dto';
 import app from '../../../app/server';
 
-export const addProduct = (args: {
+type Event = ReturnType<
+  typeof dto.events.addProduct | typeof dto.events.createStorage
+>;
+
+export const createSyncSession = (args: {
   storageId: string;
-  events: Array<ReturnType<typeof dto.events.addProduct>>;
+  events: Event[];
 }) => {
   return app.inject({
     method: 'POST',

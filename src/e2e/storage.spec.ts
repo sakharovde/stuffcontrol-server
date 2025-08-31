@@ -1,15 +1,14 @@
-import { faker } from '@faker-js/faker';
 import { api } from './__gen__/api';
+import { dto } from './__gen__/dto';
 
 it('should create empty storage', async () => {
-  const storageId = faker.string.uuid();
-  const storageName = faker.commerce.department();
-  const eventDate = faker.date.recent().toISOString();
+  const event = dto.events.createStorage();
+  const storageId = event.storageId;
+  const storageName = event.storageName;
 
-  const response = await api.createStorage({
+  const response = await api.createSyncSession({
     storageId,
-    storageName,
-    eventDate,
+    events: [event],
   });
 
   expect(response.statusCode).toBe(200);
@@ -24,7 +23,11 @@ it('should create empty storage', async () => {
 });
 
 it('should get created storage in storage list', async () => {
-  await api.createEmptyStorage();
+  const event = dto.events.createStorage();
+  await api.createSyncSession({
+    storageId: event.storageId,
+    events: [event],
+  });
   const response = await api.getStorageList();
 
   expect(response.statusCode).toBe(200);
