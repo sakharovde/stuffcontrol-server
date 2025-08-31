@@ -22,3 +22,22 @@ it('should create empty storage', async () => {
     storageName,
   });
 });
+
+it('should get created storage in storage list', async () => {
+  await api.createEmptyStorage();
+  const response = await api.getStorageList();
+
+  expect(response.statusCode).toBe(200);
+  const json = response.json();
+
+  expect(json?.length).toBeGreaterThan(0);
+  expect(json).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        storageId: expect.any(String),
+        storageName: expect.any(String),
+        createdAt: expect.any(String),
+      }),
+    ])
+  );
+});
