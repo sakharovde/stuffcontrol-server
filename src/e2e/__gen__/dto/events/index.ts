@@ -3,11 +3,13 @@ import { createStorage } from './create-storage';
 import { changeStorageName } from './change-storage-name';
 import { changeProductName } from './change-product-name';
 import { removeProducts } from './remove-products';
+import { deleteStorage } from './delete-storage';
 
 export const events = {
-  addProduct: addProducts,
+  addProducts,
   createStorage,
   changeStorageName,
   changeProductName,
-  removeProduct: removeProducts,
+  deleteStorage,
+  removeProducts,
 };

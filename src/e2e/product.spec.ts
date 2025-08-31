@@ -3,7 +3,7 @@ import { api } from './__gen__/api';
 
 it('should create a product', async () => {
   // CREATE
-  const event = dto.events.addProduct();
+  const event = dto.events.addProducts();
   const syncSessionResponse = await api.createSyncSession({
     storageId: event.storageId,
     events: [event],
@@ -35,7 +35,7 @@ it('should create a product', async () => {
 
 it('should change product name', async () => {
   // CREATE
-  const event = dto.events.addProduct();
+  const event = dto.events.addProducts();
   await api.createSyncSession({
     storageId: event.storageId,
     events: [event],
@@ -77,14 +77,14 @@ it('should change product name', async () => {
 
 it('should remove product', async () => {
   // CREATE
-  const event = dto.events.addProduct();
+  const event = dto.events.addProducts();
   await api.createSyncSession({
     storageId: event.storageId,
     events: [event],
   });
 
   // REMOVE
-  const removeEvent = dto.events.removeProduct();
+  const removeEvent = dto.events.removeProducts();
   removeEvent.storageId = event.storageId;
   removeEvent.productId = event.productId;
   removeEvent.batchId = event.batchId;

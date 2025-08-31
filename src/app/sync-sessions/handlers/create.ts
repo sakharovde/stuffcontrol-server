@@ -83,6 +83,17 @@ const handler: RouteHandler<SyncRoute> = async (req, reply) => {
     await transactionEntityManager.save(newSyncSession);
   });
 
+  if (newStorageEvents.some(({ eventType }) => eventType === 'deleteStorage')) {
+    await DBDataSource.manager.transaction(async (transactionEntityManager) => {
+      await transactionEntityManager.delete(SyncSession, {
+        where: { storageId },
+      });
+      await transactionEntityManager.delete(StorageEvent, {
+        where: { storageId },
+      });
+    });
+  }
+
   return DBDataSource.manager.findOne(SyncSession, {
     where: { storageId },
     order: { createdAt: 'DESC' },

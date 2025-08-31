@@ -75,3 +75,48 @@ it('should change storage name', async () => {
     ])
   );
 });
+
+it('should delete storage', async () => {
+  const event = dto.events.createStorage();
+  await api.createSyncSession({
+    storageId: event.storageId,
+    events: [event],
+  });
+
+  let storageListResponse = await api.getStorageList();
+  expect(storageListResponse.statusCode).toBe(200);
+
+  let storageListJson = storageListResponse.json();
+
+  expect(storageListJson?.length).toBeGreaterThan(0);
+  expect(storageListJson).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        storageId: event.storageId,
+        storageName: event.storageName,
+      }),
+    ])
+  );
+
+  const deleteEvent = dto.events.deleteStorage();
+  deleteEvent.storageId = event.storageId;
+
+  await api.createSyncSession({
+    storageId: deleteEvent.storageId,
+    events: [deleteEvent],
+  });
+
+  storageListResponse = await api.getStorageList();
+
+  expect(storageListResponse.statusCode).toBe(200);
+  storageListJson = storageListResponse.json();
+
+  expect(storageListJson).not.toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        storageId: event.storageId,
+        storageName: event.storageName,
+      }),
+    ])
+  );
+});
