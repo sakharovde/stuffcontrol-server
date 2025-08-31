@@ -4,9 +4,10 @@ import app from '../../../app/server';
 type Event = ReturnType<
   | typeof dto.events.createStorage
   | typeof dto.events.changeStorageName
-  | typeof dto.events.addProduct
-  | typeof dto.events.removeProduct
+  | typeof dto.events.addProducts
+  | typeof dto.events.removeProducts
   | typeof dto.events.changeProductName
+  | typeof dto.events.deleteStorage
 >;
 
 export const createSyncSession = (args: {
